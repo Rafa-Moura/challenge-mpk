@@ -6,7 +6,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.validation.constraints.Min;
 
 @Entity
 public class Cliente {
@@ -15,8 +14,7 @@ public class Cliente {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 	private String nome;
-	private String cpnj;
-	@Min(value = 18, message = "O cliente não pode ser menor de 18 anos")
+	private String cnpj;
 	private Integer idade;
 	private Date dataNascimento;
 
@@ -24,12 +22,11 @@ public class Cliente {
 
 	}
 
-	public Cliente(String nome, String cpnj, Integer idade, Date dataNascimento) {
+	public Cliente(String nome, String cnpj, Integer idade) {
 		super();
 		this.nome = nome;
-		this.cpnj = cpnj;
+		this.cnpj = cnpj;
 		this.idade = idade;
-		this.dataNascimento = dataNascimento;
 	}
 
 	public Long getId() {
@@ -48,12 +45,12 @@ public class Cliente {
 		this.nome = nome;
 	}
 
-	public String getCpnj() {
-		return cpnj;
+	public String getCnpj() {
+		return cnpj;
 	}
 
-	public void setCpnj(String cpnj) {
-		this.cpnj = cpnj;
+	public void setCnpj(String cnpj) {
+		this.cnpj = cnpj;
 	}
 
 	public Integer getIdade() {
