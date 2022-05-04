@@ -6,6 +6,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
@@ -22,6 +23,7 @@ public class Cliente {
 	@NotBlank(message= "Favor preencher o CNPJ")
 	private String cnpj;
 	@NotNull(message = "Favor preencher a idade")
+	@Min(value = 18, message = "Idade não pode ser menor que 18")
 	private Integer idade;
 	@NotNull(message = "Favor preencher a data de nascimento")
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
