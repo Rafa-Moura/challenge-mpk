@@ -45,12 +45,12 @@ public class ClienteController {
 		return clienteService.saveCliente(cliente);
 	}
 
-	@DeleteMapping(value = "/cliente/{id}")
+	@DeleteMapping(value = "/{id}")
 	public ResponseEntity<?> deleteCliente(@PathVariable Long id) {
 		return clienteService.deleteCliente(id);
 	}
 
-	@PutMapping(value = "/atualizar/{id}")
+	@PutMapping(value = "/{id}")
 	public ResponseEntity<?> updateCliente(@Valid @RequestBody Cliente cliente, @PathVariable Long id) {
 		return clienteService.updateCliente(cliente, id);
 	}
