@@ -22,11 +22,15 @@ public class ClienteService {
 		Optional<Cliente> clienteAtual = clienteRepository.findByCnpj(cliente.getCnpj());
 
 		if (cliente.getIdade() < 18) {
-			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Cliente não pode ser menor de 18 anos");
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Cliente não pode ser menor de 18 anos");
 		}
 
 		if (!clienteAtual.isEmpty()) {
-			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("CNPJ já cadastrado");
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("CNPJ já cadastrado");
+		}
+
+		if (cliente.getCnpj().equals("")) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("CNPJ Não pode ser nulo");
 		}
 
 		Cliente clienteSalvo = clienteRepository.save(cliente);
@@ -46,32 +50,39 @@ public class ClienteService {
 		Optional<Cliente> cliente = clienteRepository.findById(id);
 
 		if (!cliente.isPresent()) {
-			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Cliente não encontrado");
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cliente não encontrado");
 		}
 		return new ResponseEntity<Cliente>(cliente.get(), HttpStatus.OK);
 	}
 
 	public ResponseEntity<?> updateCliente(Cliente cliente, Long id) {
 		Optional<Cliente> clienteSalvo = clienteRepository.findById(id);
+
+		Optional<Cliente> checarCnpj = clienteRepository.findByCnpj(cliente.getCnpj());
+
 		if (clienteSalvo.isPresent()) {
-			Cliente user = clienteRepository.save(cliente);
-			return ResponseEntity.ok(user);
+			if (!checarCnpj.isEmpty()) {
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Este CNPJ já consta em nossos registros!");
+			} else {
+				Cliente clienteAtual = clienteRepository.getById(id);
+				cliente.setId(clienteAtual.getId());
+				Cliente user = clienteRepository.save(cliente);
+				return ResponseEntity.ok(user);
+			}
 		} else {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cliente não encontrado");
 		}
 	}
 
-	public void deleteCliente(Long id) {
-		clienteRepository.deleteById(id);
-	}
+	public ResponseEntity<?> deleteCliente(Long id) {
+		Optional<Cliente> checarCliente = clienteRepository.findById(id);
 
-	public ResponseEntity<?> findByCnpj(String cnpj) {
-
-		Optional<Cliente> cliente = clienteRepository.findByCnpj(cnpj);
-
-		if (!cliente.isPresent()) {
-			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Cliente não encontrado");
+		if (!checarCliente.isEmpty()) {
+			clienteRepository.deleteById(id);
+			return ResponseEntity.status(HttpStatus.OK).body("Cliente Excluido com sucesso");
 		}
-		return new ResponseEntity<Cliente>(cliente.get(), HttpStatus.OK);
+
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cliente não encontrado");
 	}
+
 }
