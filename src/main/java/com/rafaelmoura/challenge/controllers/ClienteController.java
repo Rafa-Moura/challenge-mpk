@@ -18,66 +18,71 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.rafaelmoura.challenge.dto.ClienteDTO;
+import com.rafaelmoura.challenge.dto.ClienteInsertDTO;
 import com.rafaelmoura.challenge.exceptions.ClienteNotFoundException;
 import com.rafaelmoura.challenge.exceptions.CnpjExistenteException;
-import com.rafaelmoura.challenge.models.Cliente;
-import com.rafaelmoura.challenge.services.ClienteService;
+import com.rafaelmoura.challenge.services.ClienteServiceImpl;
 
 @RestController
+@RequestMapping(value = "/clientes")
 public class ClienteController {
 
-	@Autowired
-	ClienteService clienteService;
+	private static final String ERROR_MSG_NOTFOUND = "Cliente não encontrado";
 
-	@GetMapping(value = "/", produces = "application/json")
-	public List<Cliente> listAll() {
+	@Autowired
+	ClienteServiceImpl clienteService;
+
+	@GetMapping(produces = "application/json")
+	public List<ClienteDTO> listAll() {
 		return clienteService.findAll();
 	}
 
 	@GetMapping(value = "/{id}", produces = "application/json")
 	public ResponseEntity<?> listOne(@PathVariable Long id) {
 		try {
-			return ResponseEntity.status(HttpStatus.OK).body(clienteService.findById(id));
+			ClienteDTO cliente = clienteService.findById(id);
+			return ResponseEntity.status(HttpStatus.OK).body(cliente);
 		} catch (ClienteNotFoundException e) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cliente não encontrado");
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ERROR_MSG_NOTFOUND);
 		}
 
 	}
 
-	@PostMapping("/")
-	public ResponseEntity<?> saveCliente(@Valid @RequestBody Cliente cliente) {
+	@PostMapping
+	public ResponseEntity<?> save(@Valid @RequestBody ClienteInsertDTO cliente) {
 		try {
-			clienteService.saveCliente(cliente);
-			return ResponseEntity.status(HttpStatus.OK).body("Cliente cadastrado com sucesso");
+			ClienteDTO clienteDto = clienteService.save(cliente);
+			return ResponseEntity.status(HttpStatus.CREATED).body(clienteDto);
 		} catch (CnpjExistenteException e) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("CNPJ já existe no sistema");
 		}
 	}
 
 	@DeleteMapping(value = "/{id}")
-	public ResponseEntity<?> deleteCliente(@PathVariable Long id) {
+	public ResponseEntity<?> delete(@PathVariable Long id) {
 		try {
-			clienteService.deleteCliente(id);
+			clienteService.delete(id);
 			return ResponseEntity.status(HttpStatus.OK).body("Cliente excluido com sucesso");
 		} catch (ClienteNotFoundException e) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cliente não encontrado");
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ERROR_MSG_NOTFOUND);
 		}
 	}
 
 	@PutMapping(value = "/{id}")
-	public ResponseEntity<?> updateCliente(@Valid @RequestBody Cliente cliente, @PathVariable Long id) {
-
+	public ResponseEntity<?> update(@Valid @RequestBody ClienteDTO dto, @PathVariable Long id) {
 		try {
-			clienteService.updateCliente(cliente, id);
+			clienteService.update(dto, id);
 			return ResponseEntity.status(HttpStatus.OK).body("Cliente atualizado com sucesso");
-
-		} catch (ClienteNotFoundException | CnpjExistenteException e) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Cliente já cadastrado ou não encontrado");
+		} catch (ClienteNotFoundException e) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ERROR_MSG_NOTFOUND);
+		} catch (CnpjExistenteException e) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("CNPJ já cadastrado");
 		}
-
 	}
 
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
